@@ -53,7 +53,7 @@ export const WizardFormSample = (props: IWizardFormSampleProps) => {
   return (
     <Formik
       initialValues={{
-        recommendationScore: 10,
+        recommendationScore: 5,
         feedbackCategory: "",
         website: {
           visitGoal: "",

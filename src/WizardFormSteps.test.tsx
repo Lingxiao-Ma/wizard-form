@@ -125,37 +125,26 @@ test("Test option steps - optionStep in optionStep", () => {
 test("Test reset", () => {
   const steps = createOptionsInOptionsSteps();
 
-  expect(steps.nextStepConfig()!.step()).toEqual(1);
-  expect(steps.nextStepConfig()!.step()).toEqual(2);
+  const verify = () => {
+    expect(steps.hasNext()).toBe(true);
 
-  expect(steps.nextStepConfig()!.step()).toEqual(11);
+    expect(steps.nextStepConfig()!.step()).toEqual(1);
+    expect(steps.nextStepConfig()!.step()).toEqual(2);
 
-  expect(steps.nextStepConfig()!.step()).toEqual(111);
-  expect(steps.nextStepConfig()!.step()).toEqual(112);
-  expect(steps.nextStepConfig()!.step()).toEqual(113);
+    expect(steps.nextStepConfig()!.step()).toEqual(11);
 
-  expect(steps.nextStepConfig()!.step()).toEqual(13);
+    expect(steps.nextStepConfig()!.step()).toEqual(111);
+    expect(steps.nextStepConfig()!.step()).toEqual(112);
+    expect(steps.nextStepConfig()!.step()).toEqual(113);
 
-  expect(steps.nextStepConfig()!.step()).toEqual(3);
+    expect(steps.nextStepConfig()!.step()).toEqual(13);
 
-  expect(steps.hasNext()).toBe(false);
+    expect(steps.nextStepConfig()!.step()).toEqual(3);
 
+    expect(steps.hasNext()).toBe(false);
+  };
+
+  verify();
   steps.reset();
-
-  expect(steps.hasNext()).toBe(true);
-
-  expect(steps.nextStepConfig()!.step()).toEqual(1);
-  expect(steps.nextStepConfig()!.step()).toEqual(2);
-
-  expect(steps.nextStepConfig()!.step()).toEqual(11);
-
-  expect(steps.nextStepConfig()!.step()).toEqual(111);
-  expect(steps.nextStepConfig()!.step()).toEqual(112);
-  expect(steps.nextStepConfig()!.step()).toEqual(113);
-
-  expect(steps.nextStepConfig()!.step()).toEqual(13);
-
-  expect(steps.nextStepConfig()!.step()).toEqual(3);
-
-  expect(steps.hasNext()).toBe(false);
+  verify();
 });

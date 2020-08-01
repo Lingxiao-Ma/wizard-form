@@ -1,6 +1,7 @@
 import React from "react";
-import { Form, Input, Radio, Rate, Select } from "formik-antd";
+import { Form, Input, Radio, Select } from "formik-antd";
 import { WizardFormSteps, StepOptions } from "./WizardFormSteps";
+import { FormRate } from "./Rate";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -11,12 +12,12 @@ export const RecommendationScore = () => {
       label="How likely are you to recommend Cole Haan to a friend or colleague?"
       name="recommendationScore"
     >
-      <Rate name="recommendationScore" />
+      <FormRate name="recommendationScore" count={10} defaultValue={5} />
     </Form.Item>
   );
 };
 
-export const FeedbackCategory = (stepOptions: StepOptions) => () => {
+export const createFeedbackCategory = (stepOptions: StepOptions) => () => {
   const handleChange = (value: string) => {
     stepOptions.select(value);
   };
@@ -142,8 +143,8 @@ export const GeneralFeedback = createFeedback("general.feedbackComments");
 export const ProductFeedback = createFeedback("product.feedbackComments");
 
 const createRootSteps = (): WizardFormSteps => {
-  const options = new Map();
-  options.set(
+  const feedbackOptions = new Map();
+  feedbackOptions.set(
     "website",
     new WizardFormSteps([
       { name: "website.visitGoal", step: WebSiteVisitGoal },
@@ -154,25 +155,28 @@ const createRootSteps = (): WizardFormSteps => {
       { name: "website.feedbackComments", step: WebSiteFeedback },
     ])
   );
-  options.set(
+  feedbackOptions.set(
     "product",
     new WizardFormSteps([
       { name: "product.category", step: ProductCategory },
       { name: "product.feedbackComments", step: ProductFeedback },
     ])
   );
-  options.set(
+  feedbackOptions.set(
     "general",
     new WizardFormSteps([
       { name: "general.feedbackComments", step: GeneralFeedback },
     ])
   );
 
-  const stepOptions = new StepOptions(options);
+  const feedbackStepOptions = new StepOptions(feedbackOptions);
   return new WizardFormSteps([
     { name: "recommendationScore", step: RecommendationScore },
-    { name: "feedbackCategory", step: FeedbackCategory(stepOptions) },
-    { name: "website", step: stepOptions },
+    {
+      name: "feedbackCategory",
+      step: createFeedbackCategory(feedbackStepOptions),
+    },
+    { name: "feedbackStepOptions", step: feedbackStepOptions },
   ]);
 };
 
