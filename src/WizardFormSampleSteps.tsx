@@ -44,9 +44,9 @@ export const WebSiteVisitGoal = () => {
   return (
     <Form.Item
       label="What was your goal for todays visit to ColeHaan.com?"
-      name="webSite.visitGoal"
+      name="website.visitGoal"
     >
-      <Select name="webSite.visitGoal">
+      <Select name="website.visitGoal">
         <Option value="Browse new arrivals">Browse new arrivals</Option>
         <Option value="Find a specific style">Find a specific style</Option>
         <Option value="Browse sales items">Browse sales items</Option>
@@ -70,40 +70,40 @@ export const WebSiteGoalAccomplishRating = () => {
   return (
     <Form.Item
       label="How easy was it to accomplish that goal?"
-      name="webSite.goalAccomplishRating"
+      name="website.goalAccomplishRating"
     >
       <Radio.Group name="webSite.goalAccomplishRating">
         <Radio
           style={radioStyle}
-          name="webSite.goalAccomplishRating"
+          name="website.goalAccomplishRating"
           value="Very Difficult"
         >
           Very Difficult
         </Radio>
         <Radio
           style={radioStyle}
-          name="webSite.goalAccomplishRating"
+          name="website.goalAccomplishRating"
           value="Difficult"
         >
           Difficult
         </Radio>
         <Radio
           style={radioStyle}
-          name="webSite.goalAccomplishRating"
+          name="website.goalAccomplishRating"
           value="Not Difficult nor Easy"
         >
           Not Difficult nor Easy
         </Radio>
         <Radio
           style={radioStyle}
-          name="webSite.goalAccomplishRating"
+          name="website.goalAccomplishRating"
           value="Easy"
         >
           Easy
         </Radio>
         <Radio
           style={radioStyle}
-          name="webSite.goalAccomplishRating"
+          name="website.goalAccomplishRating"
           value="Very Easy"
         >
           Very Easy
@@ -118,7 +118,6 @@ export const ProductCategory = () => {
     <Form.Item
       label="What category would you like to leave feedback about?"
       name="product.category"
-      className="Form-item"
     >
       <Select name="product.category">
         <Option value="Footwear">Footwear</Option>
@@ -138,7 +137,7 @@ export const createFeedback = (name: string) => () => {
   );
 };
 
-export const WebSiteFeedback = createFeedback("webSite.feedbackComments");
+export const WebSiteFeedback = createFeedback("website.feedbackComments");
 export const GeneralFeedback = createFeedback("general.feedbackComments");
 export const ProductFeedback = createFeedback("product.feedbackComments");
 
@@ -147,22 +146,33 @@ const createRootSteps = (): WizardFormSteps => {
   options.set(
     "website",
     new WizardFormSteps([
-      WebSiteVisitGoal,
-      WebSiteGoalAccomplishRating,
-      WebSiteFeedback,
+      { name: "website.visitGoal", step: WebSiteVisitGoal },
+      {
+        name: "website.goalAccomplishRating",
+        step: WebSiteGoalAccomplishRating,
+      },
+      { name: "website.feedbackComments", step: WebSiteFeedback },
     ])
   );
   options.set(
     "product",
-    new WizardFormSteps([ProductCategory, ProductFeedback])
+    new WizardFormSteps([
+      { name: "product.category", step: ProductCategory },
+      { name: "product.feedbackComments", step: ProductFeedback },
+    ])
   );
-  options.set("general", new WizardFormSteps([GeneralFeedback]));
+  options.set(
+    "general",
+    new WizardFormSteps([
+      { name: "general.feedbackComments", step: GeneralFeedback },
+    ])
+  );
 
   const stepOptions = new StepOptions(options);
   return new WizardFormSteps([
-    RecommendationScore,
-    FeedbackCategory(stepOptions),
-    stepOptions,
+    { name: "recommendationScore", step: RecommendationScore },
+    { name: "feedbackCategory", step: FeedbackCategory(stepOptions) },
+    { name: "website", step: stepOptions },
   ]);
 };
 

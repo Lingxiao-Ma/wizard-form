@@ -2,50 +2,85 @@ import React, { useState } from "react";
 import { Modal } from "antd";
 import { Form } from "formik-antd";
 import { Formik } from "formik";
+import * as Yup from "yup";
+import { WizardFormSteps, IStepPageConfig } from "./WizardFormSteps";
 
-export const WizardFormSample = (props: any) => {
-  const { steps, initalStep, onOK, ...rest } = props;
+const FormSchema = Yup.object().shape({
+  feedbackCategory: Yup.string().required("Please select a category"),
+});
 
-  const [step, setStep] = useState({ stepPage: initalStep });
-  const gotoNext = () => {
-    setStep({ stepPage: steps.nextStep() });
+export interface IWizardFormSampleProps {
+  stepConfigs: WizardFormSteps;
+  initialStepConfig: IStepPageConfig;
+  onSubmit: (values: object) => void;
+  onCancel: () => void;
+}
+export const WizardFormSample = (props: IWizardFormSampleProps) => {
+  const { stepConfigs, initialStepConfig, onSubmit, onCancel } = props;
+
+  const [stepConfig, setStepConfig] = useState<IStepPageConfig>(
+    initialStepConfig
+  );
+  const gotoNext = (
+    name: string,
+    setFieldTouched: (
+      field: string,
+      isTouched?: boolean,
+      shouldValidate?: boolean
+    ) => void
+  ) => () => {
+    try {
+      setStepConfig(stepConfigs.nextStepConfig() as IStepPageConfig);
+    } catch {
+      // Enable error message
+      setFieldTouched(name, true);
+    }
   };
-  const { stepPage } = step;
 
-  const handleOK = (submitForm: any) => {
-    return steps.hasNext() ? gotoNext : submitForm;
+  const handleOK = (
+    submitForm: () => Promise<any>,
+    name: string,
+    setFieldTouched: (
+      field: string,
+      isTouched?: boolean,
+      shouldValidate?: boolean
+    ) => void
+  ) => {
+    return stepConfigs.hasNext() ? gotoNext(name, setFieldTouched) : submitForm;
   };
-  const okText = steps.hasNext() ? "Next" : "Submit";
+  const okText = stepConfigs.hasNext() ? "Next" : "Submit";
 
   return (
     <Formik
       initialValues={{
         recommendationScore: 10,
-        feedbackCategory: null,
-        webSite: {
-          visitGoal: null,
-          goalAccomplishRating: null,
+        feedbackCategory: "",
+        website: {
+          visitGoal: "",
+          goalAccomplishRating: "",
           feedbackComments: "",
         },
         product: {
-          category: null,
+          category: "",
           feedbackComments: "",
         },
         general: {
           feedbackComments: "",
         },
       }}
+      validationSchema={FormSchema}
       onSubmit={(values) => {
-        onOK(values);
+        onSubmit(values);
       }}
-      render={({ submitForm }) => (
+      render={({ submitForm, setFieldTouched }) => (
         <Modal
-          onOk={handleOK(submitForm)}
+          onOk={handleOK(submitForm, stepConfig.name, setFieldTouched)}
+          onCancel={onCancel}
           title="Wizard Form Sample"
           okText={okText}
-          {...rest}
+          visible={true}
         >
-          <Form layout="vertical">{stepPage()}</Form>
+          <Form layout="vertical">{stepConfig.step()}</Form>
         </Modal>
       )}
     />

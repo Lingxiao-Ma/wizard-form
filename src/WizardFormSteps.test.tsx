@@ -1,134 +1,142 @@
-import { WizardFormSteps, StepOptions } from "./WizardFormSteps";
+import { WizardFormSteps, StepOptions, Step } from "./WizardFormSteps";
+
+const createSteps = (steps: Step[]) => {
+  const stepconfigs = steps.map((step, index) => {
+    return { name: `key${index}`, step };
+  });
+  return new WizardFormSteps(stepconfigs);
+};
 
 test("Test simple steps", () => {
-  const steps = new WizardFormSteps([() => 1, () => 2, () => 3]);
+  const steps = new WizardFormSteps([
+    { name: "key1", step: () => 1 },
+    { name: "key2", step: () => 2 },
+    { name: "key3", step: () => 3 },
+  ]);
   expect(steps.hasNext()).toBe(true);
-  expect(steps.nextStep()!()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
   expect(steps.hasNext()).toBe(true);
-  expect(steps.nextStep()!()).toEqual(2);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
   expect(steps.hasNext()).toBe(true);
-  expect(steps.nextStep()!()).toEqual(3);
+  expect(steps.nextStepConfig()!.step()).toEqual(3);
   expect(steps.hasNext()).toBe(false);
 });
 
 test("Test option steps", () => {
   const options = new Map();
-  options.set("optionA", new WizardFormSteps([() => 1, () => 2, () => 3]));
-  options.set("optionB", new WizardFormSteps([() => 11, () => 12, () => 13]));
+  options.set("optionA", createSteps([() => 1, () => 2, () => 3]));
+  options.set("optionB", createSteps([() => 11, () => 12, () => 13]));
   const stepOptions = new StepOptions(options);
   stepOptions.select("optionB");
 
-  const steps = new WizardFormSteps([() => 1, () => 2, stepOptions, () => 3]);
-  expect(steps.nextStep()!()).toEqual(1);
-  expect(steps.nextStep()!()).toEqual(2);
+  const steps = createSteps([() => 1, () => 2, stepOptions, () => 3]);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
 
-  expect(steps.nextStep()!()).toEqual(11);
-  expect(steps.nextStep()!()).toEqual(12);
-  expect(steps.nextStep()!()).toEqual(13);
+  expect(steps.nextStepConfig()!.step()).toEqual(11);
+  expect(steps.nextStepConfig()!.step()).toEqual(12);
+  expect(steps.nextStepConfig()!.step()).toEqual(13);
 
-  expect(steps.nextStep()!()).toEqual(3);
+  expect(steps.nextStepConfig()!.step()).toEqual(3);
 
   expect(steps.hasNext()).toBe(false);
 });
 
 test("Test option steps - option step as last step", () => {
   const options = new Map();
-  options.set("optionA", new WizardFormSteps([() => 1, () => 2, () => 3]));
-  options.set("optionB", new WizardFormSteps([() => 11, () => 12, () => 13]));
+  options.set("optionA", createSteps([() => 1, () => 2, () => 3]));
+  options.set("optionB", createSteps([() => 11, () => 12, () => 13]));
   const stepOptions = new StepOptions(options);
   stepOptions.select("optionB");
 
-  const steps = new WizardFormSteps([() => 1, () => 2, stepOptions]);
-  expect(steps.nextStep()!()).toEqual(1);
-  expect(steps.nextStep()!()).toEqual(2);
+  const steps = createSteps([() => 1, () => 2, stepOptions]);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
 
-  expect(steps.nextStep()!()).toEqual(11);
-  expect(steps.nextStep()!()).toEqual(12);
-  expect(steps.nextStep()!()).toEqual(13);
+  expect(steps.nextStepConfig()!.step()).toEqual(11);
+  expect(steps.nextStepConfig()!.step()).toEqual(12);
+  expect(steps.nextStepConfig()!.step()).toEqual(13);
 
   expect(steps.hasNext()).toBe(false);
 });
 
 test("Test option steps - option select", () => {
   const options = new Map();
-  options.set("optionA", new WizardFormSteps([() => 1, () => 2, () => 3]));
-  options.set("optionB", new WizardFormSteps([() => 11, () => 12, () => 13]));
+  options.set("optionA", createSteps([() => 1, () => 2, () => 3]));
+  options.set("optionB", createSteps([() => 11, () => 12, () => 13]));
   const stepOptions = new StepOptions(options);
 
-  const steps = new WizardFormSteps([() => 1, () => 2, stepOptions, () => 3]);
-  expect(steps.nextStep()!()).toEqual(1);
-  expect(steps.nextStep()!()).toEqual(2);
+  const steps = createSteps([() => 1, () => 2, stepOptions, () => 3]);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
 
   expect(steps.hasNext()).toBe(true); // option unselected
-  expect(() => steps.nextStep()).toThrow();
+  expect(() => steps.nextStepConfig()).toThrow();
   stepOptions.select("optionB");
-  expect(steps.nextStep()!()).toEqual(11);
-  expect(steps.nextStep()!()).toEqual(12);
-  expect(steps.nextStep()!()).toEqual(13);
-  expect(steps.nextStep()!()).toEqual(3);
+  expect(steps.nextStepConfig()!.step()).toEqual(11);
+  expect(steps.nextStepConfig()!.step()).toEqual(12);
+  expect(steps.nextStepConfig()!.step()).toEqual(13);
+  expect(steps.nextStepConfig()!.step()).toEqual(3);
 
   expect(steps.hasNext()).toBe(false);
 });
 
-const createSteps = () => {
+const createOptionsInOptionsSteps = () => {
   const embededOptions = new Map();
   embededOptions.set(
     "embededOptionA",
-    new WizardFormSteps([() => 1, () => 2, () => 3])
+    createSteps([() => 1, () => 2, () => 3])
   );
   embededOptions.set(
     "embededOptionB",
-    new WizardFormSteps([() => 111, () => 112, () => 113])
+    createSteps([() => 111, () => 112, () => 113])
   );
   const embededStepOptions = new StepOptions(embededOptions);
   embededStepOptions.select("embededOptionB");
 
   const options = new Map();
-  options.set("optionA", new WizardFormSteps([() => 1, () => 2, () => 3]));
-  options.set(
-    "optionB",
-    new WizardFormSteps([() => 11, embededStepOptions, () => 13])
-  );
+  options.set("optionA", createSteps([() => 1, () => 2, () => 3]));
+  options.set("optionB", createSteps([() => 11, embededStepOptions, () => 13]));
   const stepOptions = new StepOptions(options);
   stepOptions.select("optionB");
 
-  return new WizardFormSteps([() => 1, () => 2, stepOptions, () => 3]);
+  return createSteps([() => 1, () => 2, stepOptions, () => 3]);
 };
 
 test("Test option steps - optionStep in optionStep", () => {
-  const steps = createSteps();
+  const steps = createOptionsInOptionsSteps();
 
-  expect(steps.nextStep()!()).toEqual(1);
-  expect(steps.nextStep()!()).toEqual(2);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
 
-  expect(steps.nextStep()!()).toEqual(11);
+  expect(steps.nextStepConfig()!.step()).toEqual(11);
 
-  expect(steps.nextStep()!()).toEqual(111);
-  expect(steps.nextStep()!()).toEqual(112);
-  expect(steps.nextStep()!()).toEqual(113);
+  expect(steps.nextStepConfig()!.step()).toEqual(111);
+  expect(steps.nextStepConfig()!.step()).toEqual(112);
+  expect(steps.nextStepConfig()!.step()).toEqual(113);
 
-  expect(steps.nextStep()!()).toEqual(13);
+  expect(steps.nextStepConfig()!.step()).toEqual(13);
 
-  expect(steps.nextStep()!()).toEqual(3);
+  expect(steps.nextStepConfig()!.step()).toEqual(3);
 
   expect(steps.hasNext()).toBe(false);
 });
 
 test("Test reset", () => {
-  const steps = createSteps();
+  const steps = createOptionsInOptionsSteps();
 
-  expect(steps.nextStep()!()).toEqual(1);
-  expect(steps.nextStep()!()).toEqual(2);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
 
-  expect(steps.nextStep()!()).toEqual(11);
+  expect(steps.nextStepConfig()!.step()).toEqual(11);
 
-  expect(steps.nextStep()!()).toEqual(111);
-  expect(steps.nextStep()!()).toEqual(112);
-  expect(steps.nextStep()!()).toEqual(113);
+  expect(steps.nextStepConfig()!.step()).toEqual(111);
+  expect(steps.nextStepConfig()!.step()).toEqual(112);
+  expect(steps.nextStepConfig()!.step()).toEqual(113);
 
-  expect(steps.nextStep()!()).toEqual(13);
+  expect(steps.nextStepConfig()!.step()).toEqual(13);
 
-  expect(steps.nextStep()!()).toEqual(3);
+  expect(steps.nextStepConfig()!.step()).toEqual(3);
 
   expect(steps.hasNext()).toBe(false);
 
@@ -136,18 +144,18 @@ test("Test reset", () => {
 
   expect(steps.hasNext()).toBe(true);
 
-  expect(steps.nextStep()!()).toEqual(1);
-  expect(steps.nextStep()!()).toEqual(2);
+  expect(steps.nextStepConfig()!.step()).toEqual(1);
+  expect(steps.nextStepConfig()!.step()).toEqual(2);
 
-  expect(steps.nextStep()!()).toEqual(11);
+  expect(steps.nextStepConfig()!.step()).toEqual(11);
 
-  expect(steps.nextStep()!()).toEqual(111);
-  expect(steps.nextStep()!()).toEqual(112);
-  expect(steps.nextStep()!()).toEqual(113);
+  expect(steps.nextStepConfig()!.step()).toEqual(111);
+  expect(steps.nextStepConfig()!.step()).toEqual(112);
+  expect(steps.nextStepConfig()!.step()).toEqual(113);
 
-  expect(steps.nextStep()!()).toEqual(13);
+  expect(steps.nextStepConfig()!.step()).toEqual(13);
 
-  expect(steps.nextStep()!()).toEqual(3);
+  expect(steps.nextStepConfig()!.step()).toEqual(3);
 
   expect(steps.hasNext()).toBe(false);
 });

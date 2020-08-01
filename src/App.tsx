@@ -2,49 +2,40 @@ import React, { useState } from "react";
 import { Button, Input } from "antd";
 import { WizardFormSample } from "./WizardFormSample";
 import "./App.css";
-import { wizardFormSampleSteps as steps } from "./WizardFormSampleSteps";
-import { StepPage } from "./WizardFormSteps";
+import { wizardFormSampleSteps as stepConfigs } from "./WizardFormSampleSteps";
+import { IStepPageConfig } from "./WizardFormSteps";
 
 const { TextArea } = Input;
 
-type InitialStepType = {
-  initialStep: StepPage | null;
-};
 function App() {
-  const [wizardSteps, setWizardSteps] = useState<InitialStepType>({
-    initialStep: null,
-  });
+  const [
+    initialStepConfig,
+    setInitialStepConfig,
+  ] = useState<IStepPageConfig | null>(null);
   const [feedback, setFeedback] = useState("");
   const startFeedbackWizard = () => {
-    steps.reset();
-    setWizardSteps({ initialStep: steps.nextStep() });
+    stepConfigs.reset();
+    setInitialStepConfig(stepConfigs.nextStepConfig());
     setFeedback("");
   };
-  const handleOK = (values: any) => {
-    setWizardSteps({
-      initialStep: null,
-    });
+  const handleSubmit = (values: any) => {
+    setInitialStepConfig(null);
     setFeedback(JSON.stringify(values, null, 2));
   };
 
   const handleCancel = () => {
-    setWizardSteps({
-      initialStep: null,
-    });
+    setInitialStepConfig(null);
   };
-
-  const { initialStep } = wizardSteps;
 
   return (
     <div className="app">
       <p>Click Feedback button to start a wizard form:</p>
       <Button onClick={startFeedbackWizard}> Feedback </Button>
-      {initialStep && (
+      {initialStepConfig && (
         <WizardFormSample
-          steps={steps}
-          initalStep={initialStep}
-          visible={true}
-          onOK={handleOK}
+          stepConfigs={stepConfigs}
+          initialStepConfig={initialStepConfig}
+          onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
       )}

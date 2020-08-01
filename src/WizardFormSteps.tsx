@@ -1,16 +1,26 @@
-type Step = StepPage | StepOptions;
+export type Step = StepPage | StepOptions;
+export interface IStepConfig {
+  name: string; // match to formik state,
+  step: Step;
+}
+
+export interface IStepPageConfig {
+  name: string;
+  step: StepPage;
+}
+
 export type StepPage = () => React.ReactNode;
 interface IStepIterator {
   hasNext(): boolean;
-  nextStep(): StepPage | null;
+  nextStepConfig(): IStepPageConfig | null;
   reset(): void;
 }
 export class WizardFormSteps implements IStepIterator {
-  protected _steps: Step[];
+  protected _stepConfigs: IStepConfig[];
   private _currentStep: number;
 
-  constructor(steps: Step[]) {
-    this._steps = steps;
+  constructor(stepConfigs: IStepConfig[]) {
+    this._stepConfigs = stepConfigs;
     this._currentStep = 0;
   }
 
@@ -24,22 +34,23 @@ export class WizardFormSteps implements IStepIterator {
 
   reset() {
     this._currentStep = 0;
-    for (let step of this._steps) {
-      if (this.isStepOptions(step)) {
-        const stepOption = step as StepOptions;
+    for (let stepConfig of this._stepConfigs) {
+      if (this.isStepOptions(stepConfig.step)) {
+        const stepOption = stepConfig.step as StepOptions;
         stepOption.reset();
       }
     }
   }
 
   hasNext(): boolean {
-    if (this._currentStep < this._steps.length - 1) {
+    if (this._currentStep < this._stepConfigs.length - 1) {
       return true;
     }
 
-    if (this._currentStep === this._steps.length - 1) {
-      if (this.isStepOptions(this._steps[this._currentStep])) {
-        const switchStep = this._steps[this._currentStep] as StepOptions;
+    if (this._currentStep === this._stepConfigs.length - 1) {
+      if (this.isStepOptions(this._stepConfigs[this._currentStep].step)) {
+        const switchStep = this._stepConfigs[this._currentStep]
+          .step as StepOptions;
         return switchStep.hasNext();
       }
 
@@ -50,20 +61,21 @@ export class WizardFormSteps implements IStepIterator {
     return false;
   }
 
-  nextStep(): StepPage | null {
-    if (!this.isStepOptions(this._steps[this._currentStep])) {
-      const stepPage = this._steps[this._currentStep] as StepPage;
+  nextStepConfig(): IStepPageConfig | null {
+    if (!this.isStepOptions(this._stepConfigs[this._currentStep].step)) {
+      const stepConfig = this._stepConfigs[this._currentStep];
       this._currentStep++;
-      return stepPage;
+      return stepConfig as IStepPageConfig;
     }
 
-    const stepOptions = this._steps[this._currentStep] as StepOptions;
+    const stepOptions = this._stepConfigs[this._currentStep]
+      .step as StepOptions;
     if (stepOptions.hasNext()) {
-      return stepOptions.nextStep();
+      return stepOptions.nextStepConfig();
     }
 
     this._currentStep++; // iterate to next
-    return this.nextStep();
+    return this.nextStepConfig();
   }
 }
 
@@ -104,11 +116,11 @@ export class StepOptions implements IStepIterator {
     return steps.hasNext();
   }
 
-  nextStep(): StepPage | null {
+  nextStepConfig(): IStepPageConfig | null {
     const steps = this.selectedSteps();
     if (!steps) {
       throw new Error("Step Options should be configured first");
     }
-    return steps.nextStep();
+    return steps.nextStepConfig();
   }
 }
