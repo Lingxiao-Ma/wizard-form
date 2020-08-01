@@ -82,10 +82,12 @@ export class WizardFormSteps implements IStepIterator {
 export class StepOptions implements IStepIterator {
   private _options: Map<string, WizardFormSteps>;
   private _selectedKey: string | undefined;
+  private _defaultKey?: string;
   constructor(options: Map<string, WizardFormSteps>, defaultKey?: string) {
     this._options = options;
     if (defaultKey) {
       this._selectedKey = defaultKey;
+      this._defaultKey = defaultKey;
     }
   }
 
@@ -97,6 +99,7 @@ export class StepOptions implements IStepIterator {
   }
 
   reset() {
+    this._selectedKey = this._defaultKey;
     for (let step of this._options.values()) {
       step.reset();
     }
