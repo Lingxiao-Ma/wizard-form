@@ -73,7 +73,7 @@ export const WebSiteGoalAccomplishRating = () => {
       label="How easy was it to accomplish that goal?"
       name="website.goalAccomplishRating"
     >
-      <Radio.Group name="webSite.goalAccomplishRating">
+      <Radio.Group name="website.goalAccomplishRating">
         <Radio
           style={radioStyle}
           name="website.goalAccomplishRating"
